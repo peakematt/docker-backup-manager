@@ -11,6 +11,17 @@
             }
         },
         {
+            "job_name": "DB_DUMP_2",
+            "job_subtype": "postgres_export",
+            "export_all_db": true,
+            "host": "localhost",
+            "port": "5432"
+            "credentials": {
+                "username": "root",
+                "password": "password"
+            }
+        },
+        {
             "job_name": "Directory_Backup_1",
             "job_subtype": "directory_backup",
             "path": "/my/dir/to/be/backed/up",
