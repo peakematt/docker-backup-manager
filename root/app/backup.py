@@ -14,25 +14,28 @@ pathlib.Path("{}/latest".format(backup_root_folder)).unlink(missing_ok=True)
 latest = pathlib.Path('{}/latest'.format(backup_root_folder))
 latest.symlink_to(EXPORT_PARENT_FOLDER)
 
-def RunThis(cmd : list): 
+
+def RunThis(cmd: list):
     cmd = " ".join(cmd)
     p = subprocess.Popen(cmd, shell=True)
     p.wait()
 
+
 class BaseJob:
     def __init__(self):
         self._NAME = ""
-        self._JOBTYPE=""
+        self._JOBTYPE = ""
         self._data = dict()
 
-    def Load(self, data : dict):
+    def Load(self, data: dict):
         self._data = data
 
-    def LoadJson(self, data : str):
+    def LoadJson(self, data: str):
         self._data = json.loads(data)
 
     def Run(self):
         pass
+
 
 class DumpMySqlDatabaseJob(BaseJob):
     def __init__(self):
@@ -42,47 +45,84 @@ class DumpMySqlDatabaseJob(BaseJob):
 
     def Run(self):
 
-        output_dir = "{}/{}".format(EXPORT_PARENT_FOLDER, self._data['job_name'])
+        output_dir = "{}/{}".format(EXPORT_PARENT_FOLDER,
+                                    self._data['job_name'])
         pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
         output_file = "{}/{}.sql".format(output_dir, self._data["job_name"])
 
-        print("Database Export Job: [{Job_Name}] starting at {dt}".format(Job_Name=self._data['job_name'], dt=datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+        print("Database Export Job: [{Job_Name}] starting at {dt}".format(
+            Job_Name=self._data['job_name'], dt=datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 
         cmd = [
-                "mysqldump", 
-                "--all-databases", 
-                "--user={}".format(self._data['credentials']['username']), 
-                "--password={}".format(self._data['credentials']['password']), 
-                "--host={}".format(self._data['host']),
-                "--result-file={}".format(output_file),
-                "--ignore-table=mysql.general_log",
-                "--ignore-table=mysql.slow_log",
-                "--skip-lock-tables"
+            "mysqldump",
+            "--all-databases",
+            "--user={}".format(self._data['credentials']['username']),
+            "--password={}".format(self._data['credentials']['password']),
+            "--host={}".format(self._data['host']),
+            "--result-file={}".format(output_file),
+            "--ignore-table=mysql.general_log",
+            "--ignore-table=mysql.slow_log",
+            "--skip-lock-tables"
         ]
 
         RunThis(cmd)
-        
-        print("Database Export Job: [{Job_Name}] done at {dt}".format(Job_Name=self._data['job_name'], dt=datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 
-class DirectoryBackupJob(BaseJob):
+        print("Database Export Job: [{Job_Name}] done at {dt}".format(
+            Job_Name=self._data['job_name'], dt=datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+
+
+class DumpPostgresDatabaseJob(BaseJob):
     def __init__(self):
         super().__init__()
-        self._NAME="DirectoryBackup"
+        self._NAME = "DumpPostgresDatabase"
         self._JOBTYPE = "{}_Job".format(self._NAME)
 
     def Run(self):
 
-        output_dir = "{}/{}".format(EXPORT_PARENT_FOLDER, self._data['job_name'])
+        output_dir = "{}/{}".format(EXPORT_PARENT_FOLDER,
+                                    self._data['job_name'])
         pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
-        output_file = "{}/{}.tar.gz".format(output_dir, self._data["job_name"])
-        
-        tmp_input_dir = "{}/{}_tmp".format(EXPORT_PARENT_FOLDER, self._data['job_name'])
-        pathlib.Path(tmp_input_dir).mkdir(parents=True, exist_ok=True)
+        output_file = "{}/{}.sql".format(output_dir, self._data["job_name"])
 
-        print("Directory Backup Job: [{Job_Name}] starting at {dt}".format(Job_Name=self._data['job_name'], dt=datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+        print("Database Export Job: [{Job_Name}] starting at {dt}".format(
+            Job_Name=self._data['job_name'], dt=datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 
         cmd = [
-            "cp", 
+            "pg_dumpall",
+            "--file={}".format(output_file),
+            "--no-password",
+            "--dbname=postgresql://{user}:{secret}@{host}".format(
+                user=self._data['credentials']['username'], secret=self._data['credentials']['password'], host=self._data['host']),
+        ]
+
+        RunThis(cmd)
+
+        print("Database Export Job: [{Job_Name}] done at {dt}".format(
+            Job_Name=self._data['job_name'], dt=datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+
+
+class DirectoryBackupJob(BaseJob):
+    def __init__(self):
+        super().__init__()
+        self._NAME = "DirectoryBackup"
+        self._JOBTYPE = "{}_Job".format(self._NAME)
+
+    def Run(self):
+
+        output_dir = "{}/{}".format(EXPORT_PARENT_FOLDER,
+                                    self._data['job_name'])
+        pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
+        output_file = "{}/{}.tar.gz".format(output_dir, self._data["job_name"])
+
+        tmp_input_dir = "{}/{}_tmp".format(EXPORT_PARENT_FOLDER,
+                                           self._data['job_name'])
+        pathlib.Path(tmp_input_dir).mkdir(parents=True, exist_ok=True)
+
+        print("Directory Backup Job: [{Job_Name}] starting at {dt}".format(
+            Job_Name=self._data['job_name'], dt=datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+
+        cmd = [
+            "cp",
             "-R",
             "{}/*".format(self._data['path']),
             tmp_input_dir
@@ -99,28 +139,32 @@ class DirectoryBackupJob(BaseJob):
         cmd = ["rm", "-r", tmp_input_dir]
         RunThis(cmd)
 
-        print("Directory Backup Job: [{Job_Name}] done at {dt}".format(Job_Name=self._data['job_name'], dt=datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+        print("Directory Backup Job: [{Job_Name}] done at {dt}".format(
+            Job_Name=self._data['job_name'], dt=datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+
 
 class S3UploadJob(BaseJob):
     def __init__(self):
         super().__init__()
-        self._NAME="S3Upload"
+        self._NAME = "S3Upload"
         self._JOBTYPE = "{}_Job".format(self._NAME)
 
     def Run(self):
-        print("S3 Upload Job: [{Job_Name}] starting at {dt}".format(Job_Name=self._data['job_name'], dt=datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+        print("S3 Upload Job: [{Job_Name}] starting at {dt}".format(
+            Job_Name=self._data['job_name'], dt=datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 
         client = boto3.client(
             's3',
-            aws_access_key_id = self._data["credentials"]["aws_access_key"],
-            aws_secret_access_key = self._data["credentials"]["aws_secret_access_key"]
+            aws_access_key_id=self._data["credentials"]["aws_access_key"],
+            aws_secret_access_key=self._data["credentials"]["aws_secret_access_key"]
         )
 
-        output_file_name = "{}-{}.tar.gz".format(self._data["job_name"], RUN_DT)
+        output_file_name = "{}-{}.tar.gz".format(
+            self._data["job_name"], RUN_DT)
         output_path = "/tmp/{}".format(output_file_name)
 
         with tarfile.open(output_path, "w:gz") as tgz:
-            
+
             upload_path = self._data['path_for_upload']
 
             if pathlib.Path(upload_path).is_symlink():
@@ -128,17 +172,20 @@ class S3UploadJob(BaseJob):
 
             tgz.add(str(upload_path), arcname=self._data['job_name'])
 
-        client.upload_file(output_path, self._data['bucket_name'], output_file_name, ExtraArgs = {
+        client.upload_file(output_path, self._data['bucket_name'], output_file_name, ExtraArgs={
             "StorageClass": "STANDARD_IA"
         })
 
         cmd = ["rm", "-r", output_path]
         RunThis(cmd)
 
-        print("S3 Upload Job: [{Job_Name}] done at {dt}".format(Job_Name=self._data['job_name'], dt=datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+        print("S3 Upload Job: [{Job_Name}] done at {dt}".format(
+            Job_Name=self._data['job_name'], dt=datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+
 
 class NotifyJob(BaseJob):
     pass
+
 
 class S3SyncJob(BaseJob):
     def __init__(self):
@@ -147,25 +194,29 @@ class S3SyncJob(BaseJob):
         self._JOBTYPE = "{}_Job".format(self._NAME)
 
     def Run(self):
-        print("S3 Sync Job: [{Job_Name}] starting at {dt}".format(Job_Name=self._data['job_name'], dt=datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+        print("S3 Sync Job: [{Job_Name}] starting at {dt}".format(
+            Job_Name=self._data['job_name'], dt=datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 
         cmd = [
             "s3cmd",
-            "--access_key={}".format(self._data['credentials']['aws_access_key']),
-            "--secret_key={}".format(self._data['credentials']['aws_secret_access_key']),
+            "--access_key={}".format(self._data['credentials']
+                                     ['aws_access_key']),
+            "--secret_key={}".format(self._data['credentials']
+                                     ['aws_secret_access_key']),
             "--recursive",
             "--delete-removed",
             "--storage-class=STANDARD_IA",
             "--server-side-encryption",
             "sync",
             "{}".format(self._data['path']),
-            "s3://{bucket}/{prefix}".format(bucket=self._data['bucket_name'], prefix=self._data['bucket_path_prefix'])
+            "s3://{bucket}/{prefix}".format(
+                bucket=self._data['bucket_name'], prefix=self._data['bucket_path_prefix'])
         ]
 
         RunThis(cmd)
 
-        print("S3 Sync Job: [{Job_Name}] done at {dt}".format(Job_Name=self._data['job_name'], dt=datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
-
+        print("S3 Sync Job: [{Job_Name}] done at {dt}".format(
+            Job_Name=self._data['job_name'], dt=datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 
 
 def main():
@@ -179,16 +230,19 @@ def main():
     UploadJobs = []
     NotifyJobs = []
 
-    with open(JOB_FILE,'r') as fd:
+    with open(JOB_FILE, 'r') as fd:
         d = json.loads(fd.read())
 
         for job in d["Export_Jobs"]:
             if job["job_subtype"] == "mysql_export":
                 tmp = DumpMySqlDatabaseJob()
+            elif job['job_subtype'] == 'postgres_export':
+                tmp = DumpPostgresDatabaseJob()
             elif job["job_subtype"] == "directory_backup":
                 tmp = DirectoryBackupJob()
             else:
-                print("Incorrect Job Type found: {}. Skipping.".format(job["job_subtype"]))
+                print("Incorrect Job Type found: {}. Skipping.".format(
+                    job["job_subtype"]))
                 continue
 
             tmp.Load(job)
@@ -201,7 +255,8 @@ def main():
                 tmp = S3SyncJob()
 
             else:
-                print("Incorrect Job Type found: {}. Skipping.".format(job["job_subtype"]))
+                print("Incorrect Job Type found: {}. Skipping.".format(
+                    job["job_subtype"]))
                 continue
 
             tmp.Load(job)
