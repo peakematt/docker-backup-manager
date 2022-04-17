@@ -136,7 +136,10 @@ class DirectoryBackupJob(BaseJob):
             else:
                 tgz.add(tmp_input_dir, arcname=self._data['path_archive_name'])
 
-        cmd = ["rm", "-r", tmp_input_dir]
+        cmd = ["chmod", "-R", "777", tmp_input_dir]
+        RunThis(cmd)
+
+        cmd = ["rm", "-rf", tmp_input_dir]
         RunThis(cmd)
 
         print("Directory Backup Job: [{Job_Name}] done at {dt}".format(
