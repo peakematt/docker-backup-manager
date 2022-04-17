@@ -91,8 +91,8 @@ class DumpPostgresDatabaseJob(BaseJob):
             "pg_dumpall",
             "--file={}".format(output_file),
             "--no-password",
-            "--dbname=postgresql://{user}:{secret}@{host}".format(
-                user=self._data['credentials']['username'], secret=self._data['credentials']['password'], host=self._data['host']),
+            "--dbname=postgresql://{user}:{secret}@{host}:{port}".format(
+                user=self._data['credentials']['username'], secret=self._data['credentials']['password'], host=self._data['host'], port=self._data['port']),
         ]
 
         RunThis(cmd)
