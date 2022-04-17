@@ -1,0 +1,46 @@
+{
+    "Export_Jobs": [
+        {
+            "job_name": "DB_DUMP_1",
+            "job_subtype": "mysql_export",
+            "export_all_db": true,
+            "host": "localhost",
+            "credentials": {
+                "username": "root",
+                "password": "password"
+            }
+        },
+        {
+            "job_name": "Directory_Backup_1",
+            "job_subtype": "directory_backup",
+            "path": "/my/dir/to/be/backed/up",
+            "path_archive_name": ""
+        }
+    ],
+    "Upload_Jobs": [
+        {
+            "job_name": "Upload_to_S3",
+            "job_subtype": "S3_upload",
+            "bucket_name": "my_bucket_name",
+            "bucket_path_prefix": "",
+            "path_for_upload": "/my/path/to/upload",
+            "credentials": {
+                "aws_access_key": "1234",
+                "aws_secret_access_key": "5678"
+            }
+        },
+        {
+            "job_name": "Sync_to_S3",
+            "job_subtype": "S3_sync",
+            "bucket_name": "my_bucket_name",
+            "bucket_path_prefix": "",
+            "credentials": {
+                "aws_access_key": "1234",
+                "aws_secret_access_key": "5678"
+            }
+        }
+    ],
+    "Notify_Jobs": [
+
+    ]
+}
