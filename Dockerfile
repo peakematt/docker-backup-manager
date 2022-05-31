@@ -13,11 +13,7 @@ RUN \
     python3 -m ensurepip && \
     rm -r /usr/lib/python*/ensurepip && \ 
     pip3 install --no-cache --upgrade pip setuptools wheel && \
-    pip3 install --no-cache --upgrade boto3 s3cmd && \
-    echo "**** configure cron ****" && \
-    cat /defaults/backupcron > /etc/crontabs/root
+    pip3 install --no-cache --upgrade boto3 s3cmd
 
-
-CMD ["crond", "-l2", "-f"]
-
+CMD ["python3", "/app/backup.py", "2>&1", ">", "/config/backup.log"]
 
