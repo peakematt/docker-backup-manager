@@ -45,30 +45,61 @@ class DumpMySqlDatabaseJob(BaseJob):
 
     def Run(self):
 
-        output_dir = "{}/{}".format(EXPORT_PARENT_FOLDER,
-                                    self._data['job_name'])
+        output_dir = "{}/{}".format(EXPORT_PARENT_FOLDER, self._data['job_name'])
         pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
         output_file = "{}/{}.sql".format(output_dir, self._data["job_name"])
 
-        print("Database Export Job: [{Job_Name}] starting at {dt}".format(
-            Job_Name=self._data['job_name'], dt=datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+        print("Database Export Job: [{Job_Name}] starting at {dt}".format(Job_Name=self._data['job_name'], dt=datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 
         cmd = [
-            "mysqldump",
-            "--all-databases",
-            "--user={}".format(self._data['credentials']['username']),
-            "--password={}".format(self._data['credentials']['password']),
-            "--host={}".format(self._data['host']),
-            "--result-file={}".format(output_file),
-            "--ignore-table=mysql.general_log",
-            "--ignore-table=mysql.slow_log",
-            "--skip-lock-tables"
+                "mysqldump", 
+                "--all-databases", 
+                "--user={}".format(self._data['credentials']['username']), 
+                "--password={}".format(self._data['credentials']['password']), 
+                "--host={}".format(self._data['host']),
+                "--port={}".format(self._data['port']),
+                "--result-file={}".format(output_file),
+                "--ignore-table=mysql.general_log",
+                "--ignore-table=mysql.slow_log",
+                "--ignore-table=mysql.user",
+                "--skip-lock-tables"
         ]
 
         RunThis(cmd)
+        
+        print("Database Export Job: [{Job_Name}] done at {dt}".format(Job_Name=self._data['job_name'], dt=datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 
-        print("Database Export Job: [{Job_Name}] done at {dt}".format(
-            Job_Name=self._data['job_name'], dt=datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+class DumpMySqlSingleDatabaseJob(BaseJob):
+    def __init__(self):
+        super().__init__()
+        self._NAME = "DumpMySqlSingleDatabase"
+        self._JOBTYPE = "{}_Job".format(self._NAME)
+
+    def Run(self):
+
+        output_dir = "{}/{}".format(EXPORT_PARENT_FOLDER, self._data['job_name'])
+        pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
+        output_file = "{}/{}.sql".format(output_dir, self._data["job_name"])
+
+        print("Database Export Job: [{Job_Name}] starting at {dt}".format(Job_Name=self._data['job_name'], dt=datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+
+        cmd = [
+                "mysqldump", 
+                "--databases {}".format(self._data['database']), 
+                "--user={}".format(self._data['credentials']['username']), 
+                "--password={}".format(self._data['credentials']['password']), 
+                "--host={}".format(self._data['host']),
+                "--port={}".format(self._data['port']),
+                "--result-file={}".format(output_file),
+                "--ignore-table=mysql.general_log",
+                "--ignore-table=mysql.slow_log",
+                "--ignore-table=mysql.user",
+                "--skip-lock-tables"
+        ]
+
+        RunThis(cmd)
+        
+        print("Database Export Job: [{Job_Name}] done at {dt}".format(Job_Name=self._data['job_name'], dt=datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
 
 
 class DumpPostgresDatabaseJob(BaseJob):
@@ -241,6 +272,8 @@ def main():
                 tmp = DumpMySqlDatabaseJob()
             elif job['job_subtype'] == 'postgres_export':
                 tmp = DumpPostgresDatabaseJob()
+            elif job['job_subtype'] == "single_mysql_export":
+                tmp = DumpMySqlSingleDatabaseJob()
             elif job["job_subtype"] == "directory_backup":
                 tmp = DirectoryBackupJob()
             else:
