@@ -5,6 +5,7 @@
             "job_subtype": "mysql_export",
             "export_all_db": true,
             "host": "localhost",
+            "port": 3306,
             "credentials": {
                 "username": "root",
                 "password": "password"
@@ -16,6 +17,17 @@
             "export_all_db": true,
             "host": "localhost",
             "port": "5432"
+            "credentials": {
+                "username": "root",
+                "password": "password"
+            }
+        },
+        {
+            "job_name": "DB_DUMP_3",
+            "job_subtype": "single_mysql_export",
+            "database": "sample_database",
+            "host": "localhost",
+            "port": 3306
             "credentials": {
                 "username": "root",
                 "password": "password"
