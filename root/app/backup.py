@@ -7,11 +7,11 @@ import tarfile
 import boto3
 
 RUN_DT = int(datetime.datetime.utcnow().timestamp())
-EXPORT_PARENT_FOLDER = "/config/backup/backup-{dt}".format(dt=RUN_DT)
+EXPORT_PARENT_FOLDER = f"/config/backup/backup-{RUN_DT}"
 
 backup_root_folder = pathlib.Path(EXPORT_PARENT_FOLDER).parent
-pathlib.Path("{}/latest".format(backup_root_folder)).unlink(missing_ok=True)
-latest = pathlib.Path('{}/latest'.format(backup_root_folder))
+pathlib.Path(f"{backup_root_folder}/latest").unlink(missing_ok=True)
+latest = pathlib.Path(f"{backup_root_folder}/latest")
 latest.symlink_to(EXPORT_PARENT_FOLDER)
 
 
@@ -32,6 +32,10 @@ class BaseJob:
 
     def LoadJson(self, data: str):
         self._data = json.loads(data)
+        if "credentials" in self._data and isinstance(self._data.get("credentials", {}), dict):
+            for key, value in self._data.get("credentials", {}).items():
+                if value[0:4] == "env:":
+                    self._data["credentials"][key] = os.environ.get(value[4:], "VALUE_NOT_FOUND_IN_ENVIRONMENT")
 
     def Run(self):
         pass

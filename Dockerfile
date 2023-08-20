@@ -16,6 +16,9 @@ ENV PYTHONUNBUFFERED=1
 
 # add local files
 COPY root/ /
+COPY requirements.txt /app/requirements.txt
+
+WORKDIR /app
 
 RUN \
     echo "**** install packages ****" && \
@@ -24,7 +27,7 @@ RUN \
     python3 -m ensurepip && \
     rm -r /usr/lib/python*/ensurepip && \ 
     pip3 install --no-cache --upgrade pip setuptools wheel && \
-    pip3 install --no-cache --upgrade boto3 s3cmd
+    pip3 install --no-cache -r requirements.txt
 
 
 ENTRYPOINT ["/sbin/tini", "--", "python3", "/app/backup.py"]
