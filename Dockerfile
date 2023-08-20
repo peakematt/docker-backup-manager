@@ -16,6 +16,9 @@ ENV PYTHONUNBUFFERED=1
 
 # add local files
 COPY root/ /
+COPY requirements.txt /app/requirements.txt
+
+WORKDIR /app
 
 RUN \
     echo "**** install packages ****" && \
