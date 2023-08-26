@@ -8,6 +8,7 @@ import boto3
 
 RUN_DT = int(datetime.datetime.utcnow().timestamp())
 EXPORT_PARENT_FOLDER = f"/config/backup/backup-{RUN_DT}"
+pathlib.Path(EXPORT_PARENT_FOLDER).mkdir(parents=True, exist_ok=True)
 
 backup_root_folder = pathlib.Path(EXPORT_PARENT_FOLDER).parent
 pathlib.Path(f"{backup_root_folder}/latest").unlink(missing_ok=True)
