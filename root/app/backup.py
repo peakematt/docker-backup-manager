@@ -30,6 +30,10 @@ class BaseJob:
 
     def Load(self, data: dict):
         self._data = data
+        if "credentials" in self._data and isinstance(self._data.get("credentials", {}), dict):
+            for key, value in self._data.get("credentials", {}).items():
+                if value[0:4] == "env:":
+                    self._data["credentials"][key] = os.environ.get(value[4:], "VALUE_NOT_FOUND_IN_ENVIRONMENT")
 
     def LoadJson(self, data: str):
         self._data = json.loads(data)
