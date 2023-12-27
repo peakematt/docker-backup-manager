@@ -24,17 +24,16 @@ RUN \
     echo "**** install packages ****" && \
     apk add --no-cache python3 bash mariadb-client ca-certificates postgresql-client tini && \
     echo "**** install pip ****" && \ 
-    cd /config && \
     python3 -m venv env && \
-    /config/env/bin/pip3 install --no-cache --upgrade pip setuptools wheel && \
-    /config/env/bin/pip3 install --no-cache -r requirements.txt && \
+    /app/env/bin/pip3 install --no-cache --upgrade pip setuptools wheel && \
+    /app/env/bin/pip3 install --no-cache -r requirements.txt && \
     echo "**** set up backup location ****" && \
     mkdir /config && \
     mkdir /config/backup && \
     chown -R nonroot:nonroot /config
 
 
-ENTRYPOINT ["/sbin/tini", "--", "/config/env/bin/python3", "/app/backup.py"]
+ENTRYPOINT ["/sbin/tini", "--", "/app/env/bin/python3", "/app/backup.py"]
 
 USER nonroot
 
