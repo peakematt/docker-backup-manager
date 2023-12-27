@@ -3,7 +3,6 @@
   "extends": [
     "config:recommended",
     "config:best-practices",
-    "config:recommended",
     "workarounds:all",
     "group:allNonMajor",
     "schedule:automergeDaily"
