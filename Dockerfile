@@ -23,9 +23,7 @@ WORKDIR /app
 RUN \
     echo "**** install packages ****" && \
     apk add --no-cache python3 bash mariadb-client ca-certificates postgresql-client tini && \
-    echo "**** install pip ****" && \
-    python3 -m ensurepip && \
-    rm -r /usr/lib/python*/ensurepip && \ 
+    echo "**** install pip ****" && \ 
     cd /config && \
     python3 -m venv env && \
     /config/env/bin/pip3 install --no-cache --upgrade pip setuptools wheel && \
