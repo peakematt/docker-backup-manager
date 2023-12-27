@@ -26,15 +26,17 @@ RUN \
     echo "**** install pip ****" && \
     python3 -m ensurepip && \
     rm -r /usr/lib/python*/ensurepip && \ 
-    pip3 install --no-cache --upgrade pip setuptools wheel && \
-    pip3 install --no-cache -r requirements.txt && \
+    cd /config && \
+    python3 -m venv env && \
+    /config/env/bin/pip3 install --no-cache --upgrade pip setuptools wheel && \
+    /config/env/bin/pip3 install --no-cache -r requirements.txt && \
     echo "**** set up backup location ****" && \
     mkdir /config && \
     mkdir /config/backup && \
     chown -R nonroot:nonroot /config
 
 
-ENTRYPOINT ["/sbin/tini", "--", "python3", "/app/backup.py"]
+ENTRYPOINT ["/sbin/tini", "--", "/config/env/bin/python3", "/app/backup.py"]
 
 USER nonroot
 
