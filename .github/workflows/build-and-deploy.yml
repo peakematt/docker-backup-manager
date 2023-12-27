@@ -23,12 +23,12 @@ jobs:
       run: docker build . -t ghcr.io/${{ github.repository }}:${{ github.sha }} -t ghcr.io/${{ github.repository }}:latest
 
     - name: Scan container for issues
-      uses: Azure/container-scan@v0.1
+      uses: Azure/container-scan@f9af925b897d8af5f7e0026b8bca9346261abc93 # v0.1
       with:
         image-name: ghcr.io/${{ github.repository }}:${{ github.sha }}
 
     - name: Login to GitHub Container Registry
-      uses: docker/login-action@v3.0.0
+      uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
       with:
         registry: ghcr.io
         username: ${{ github.repository_owner }}

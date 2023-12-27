@@ -14,6 +14,6 @@ jobs:
       run: docker build . -t ghcr.io/${{ github.repository }}:${{ github.sha }}
 
     - name: Scan container for issues
-      uses: Azure/container-scan@v0.1
+      uses: Azure/container-scan@f9af925b897d8af5f7e0026b8bca9346261abc93 # v0.1
       with:
         image-name: ghcr.io/${{ github.repository }}:${{ github.sha }}
