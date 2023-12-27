@@ -1,4 +1,4 @@
-FROM alpine:3.18
+FROM alpine:3.19
 
 # Non-root user for security purposes.
 #
@@ -23,18 +23,17 @@ WORKDIR /app
 RUN \
     echo "**** install packages ****" && \
     apk add --no-cache python3 bash mariadb-client ca-certificates postgresql-client tini && \
-    echo "**** install pip ****" && \
-    python3 -m ensurepip && \
-    rm -r /usr/lib/python*/ensurepip && \ 
-    pip3 install --no-cache --upgrade pip setuptools wheel && \
-    pip3 install --no-cache -r requirements.txt && \
+    echo "**** install pip ****" && \ 
+    python3 -m venv env && \
+    /app/env/bin/pip3 install --no-cache --upgrade pip setuptools wheel && \
+    /app/env/bin/pip3 install --no-cache -r requirements.txt && \
     echo "**** set up backup location ****" && \
     mkdir /config && \
     mkdir /config/backup && \
     chown -R nonroot:nonroot /config
 
 
-ENTRYPOINT ["/sbin/tini", "--", "python3", "/app/backup.py"]
+ENTRYPOINT ["/sbin/tini", "--", "/app/env/bin/python3", "/app/backup.py"]
 
 USER nonroot
 
