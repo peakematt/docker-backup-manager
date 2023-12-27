@@ -20,7 +20,7 @@ jobs:
 
 
     - name: Build Container
-      run: docker build . -t ghcr.io/${{ github.repository }}:${{ github.sha }}
+      run: docker build . -t ghcr.io/${{ github.repository }}:${{ github.sha }} -t ghcr.io/${{ github.repository }}:latest
 
     - name: Scan container for issues
       uses: Azure/container-scan@v0.1
@@ -35,4 +35,4 @@ jobs:
         password: ${{ secrets.ACTIONS_PAT }}
 
     - name: Push Container
-      run: docker push ghcr.io/${{ github.repository }}:${{ github.sha }}
+      run: docker push ghcr.io/${{ github.repository }}:latest
