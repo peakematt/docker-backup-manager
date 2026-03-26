@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Code
-      uses: actions/checkout@master
+      uses: actions/checkout@61b9e3751b92087fd0b06925ba6dd6314e06f089 # master
 
     - name: Build Container
       run: docker build . -t ghcr.io/${{ github.repository }}:${{ github.sha }}
